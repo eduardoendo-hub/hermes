@@ -16,6 +16,11 @@ services:
       POSTGRES_HOST: postgres-zhyazpyh7gurzxd46k4rwhz9
       REDIS_HOST: redis-zhyazpyh7gurzxd46k4rwhz9
       REDIS_URL: "redis://:${SERVICE_PASSWORD_REDIS}@redis-zhyazpyh7gurzxd46k4rwhz9:6379"
+    labels:
+      - traefik.http.routers.http-0-zhyazpyh7gurzxd46k4rwhz9-chatwoot.service=http-0-zhyazpyh7gurzxd46k4rwhz9-chatwoot
+      - traefik.http.routers.https-0-zhyazpyh7gurzxd46k4rwhz9-chatwoot.service=https-0-zhyazpyh7gurzxd46k4rwhz9-chatwoot
+      - traefik.http.services.http-0-zhyazpyh7gurzxd46k4rwhz9-chatwoot.loadbalancer.server.port=3000
+      - traefik.http.services.https-0-zhyazpyh7gurzxd46k4rwhz9-chatwoot.loadbalancer.server.port=3000
 
   sidekiq:
     environment:
