@@ -1,0 +1,19 @@
+# Override que conecta o sub-app `chatwoot` (do template Coolify) à rede
+# externa `coolify` onde o Traefik vive. Necessário porque o template
+# original só anexa o container à rede privada do resource.
+#
+# Aplicar manualmente colando este arquivo em:
+#   /data/coolify/services/<UUID>/docker-compose.override.yml
+# Docker Compose lê automaticamente arquivos chamados `docker-compose.override.yml`
+# no mesmo diretório.
+
+services:
+  chatwoot:
+    networks:
+      - default
+      - coolify
+
+networks:
+  coolify:
+    external: true
+    name: coolify
