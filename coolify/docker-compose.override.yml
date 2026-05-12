@@ -1,21 +1,33 @@
-# Override Hermes — fixes pra usar template Chatwoot do Coolify em paralelo
-# com o stack do próprio Coolify no mesmo host.
+# Override Hermes — Chatwoot template do Coolify rodando em paralelo
+# ao próprio Coolify no mesmo host.
 
 services:
+  redis:
+    # Reativa --requirepass usando o SERVICE_PASSWORD_REDIS gerado pelo Coolify
+    command:
+      - sh
+      - "-c"
+      - 'redis-server --requirepass "$$SERVICE_PASSWORD_REDIS"'
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - "-a"
+        - $SERVICE_PASSWORD_REDIS
+        - PING
+
   chatwoot:
     networks:
       - default
       - coolify
     environment:
       - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
-      - REDIS_URL=redis://redis-zhyazpyh7gurzxd46k4rwhz9:6379
-      - REDIS_PASSWORD=
+      - REDIS_URL=redis://:$SERVICE_PASSWORD_REDIS@redis-zhyazpyh7gurzxd46k4rwhz9:6379
 
   sidekiq:
     environment:
       - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
-      - REDIS_URL=redis://redis-zhyazpyh7gurzxd46k4rwhz9:6379
-      - REDIS_PASSWORD=
+      - REDIS_URL=redis://:$SERVICE_PASSWORD_REDIS@redis-zhyazpyh7gurzxd46k4rwhz9:6379
 
 networks:
   coolify:
