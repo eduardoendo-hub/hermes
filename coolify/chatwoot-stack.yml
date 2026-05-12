@@ -17,6 +17,31 @@
 # ====================================================================
 
 services:
+  # ------------------------------------------------------------------
+  # init-branding: roda uma vez no start, baixa os SVGs do GitHub
+  # público pro volume `branding`. Rails/Sidekiq esperam terminar
+  # antes de subir, garantindo que LOGO/LOGO_DARK/LOGO_THUMBNAIL
+  # apontem para arquivos existentes.
+  # ------------------------------------------------------------------
+  init-branding:
+    image: curlimages/curl:8.10.1
+    user: "0:0"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        set -eu
+        cd /branding
+        BASE="https://raw.githubusercontent.com/eduardoendo-hub/hermes/main/branding"
+        for f in logo.svg logo-dark.svg logo-thumbnail.svg favicon.svg custom.css; do
+          echo "fetching $f"
+          curl -fsSL -o "$f" "$BASE/$f"
+        done
+        chmod 644 /branding/*
+        ls -la /branding/
+    volumes:
+      - branding:/branding
+    restart: "no"
+
   postgres:
     image: pgvector/pgvector:pg15
     restart: unless-stopped
@@ -101,6 +126,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      init-branding:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api"]
       interval: 30s
@@ -142,6 +169,8 @@ services:
         condition: service_healthy
       rails:
         condition: service_started
+      init-branding:
+        condition: service_completed_successfully
 
 volumes:
   postgres-data:
