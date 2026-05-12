@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" width="440" height="100" role="img" aria-label="Hermes by Tech Now">
+  <defs>
+    <linearGradient id="tn-tiffany" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#057572"/>
+      <stop offset="55%" stop-color="#0ABAB5"/>
+      <stop offset="100%" stop-color="#81D8D0"/>
+    </linearGradient>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&amp;display=swap');
+      .wordmark { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; font-weight: 900; }
+    </style>
+  </defs>
+
+  <g stroke="url(#tn-tiffany)" stroke-linecap="round" fill="none">
+    <path d="M 14 78 Q 44 50 78 28" stroke-width="11"/>
+    <path d="M 20 90 Q 50 67 82 46" stroke-width="9"/>
+    <path d="M 26 98 Q 56 82 86 64" stroke-width="7"/>
+  </g>
+  <circle cx="80" cy="26" r="6" fill="#EC6088"/>
+
+  <text x="118" y="70" class="wordmark" font-size="58" letter-spacing="-2.3" fill="#EDF4F4">Hermes</text>
+</svg>

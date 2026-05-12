@@ -1,0 +1,147 @@
+# Hermes — Chatwoot stack para Coolify
+# ====================================================================
+# Cole este compose em Coolify:
+#   New Resource → Docker Compose → cole abaixo
+#   ou: New Resource → Service → procure "Chatwoot" (template oficial)
+#       e adapte com as customizações daqui.
+#
+# Coolify magic:
+#   - SERVICE_FQDN_RAILS_3000 → Coolify gera o FQDN e cria os rótulos Traefik.
+#       Em "Domains" da resource, defina: hermes.technowhub.ai (ele gera TLS).
+#   - SERVICE_PASSWORD_POSTGRES → Coolify gera e injeta. Idem REDIS.
+#   - SERVICE_BASE64_64_SECRETKEYBASE → Coolify gera o secret_key_base 64-byte.
+#
+# Volumes:
+#   - Os arquivos de branding/ ficam num volume persistente "branding".
+#     Após o primeiro deploy, suba os arquivos com: ./scripts/sync-branding.sh
+# ====================================================================
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: chatwoot
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatwoot -d chatwoot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${SERVICE_PASSWORD_REDIS}", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${SERVICE_PASSWORD_REDIS}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rails:
+    image: chatwoot/chatwoot:v3.16.0
+    restart: unless-stopped
+    entrypoint: docker/entrypoints/rails.sh
+    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+    environment:
+      # --- App ---
+      - SERVICE_FQDN_RAILS_3000
+      - INSTALLATION_NAME=Hermes
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+      - SECRET_KEY_BASE=${SERVICE_BASE64_64_SECRETKEYBASE}
+      - FRONTEND_URL=${SERVICE_FQDN_RAILS_3000}
+      - DEFAULT_LOCALE=pt_BR
+      - FORCE_SSL=true
+      - ENABLE_ACCOUNT_SIGNUP=false
+
+      # --- Brand ---
+      - BRAND_NAME=Hermes
+      - BRAND_URL=https://technowhub.ai
+      - WIDGET_BRAND_URL=https://technowhub.ai
+      - LOGO=/branding/logo.svg
+      - LOGO_THUMBNAIL=/branding/logo-thumbnail.svg
+      - LOGO_DARK=/branding/logo-dark.svg
+
+      # --- DB ---
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=${SERVICE_PASSWORD_POSTGRES}
+      - POSTGRES_DATABASE=chatwoot
+      - RAILS_MAX_THREADS=5
+
+      # --- Redis ---
+      - REDIS_URL=redis://:${SERVICE_PASSWORD_REDIS}@redis:6379
+
+      # --- Storage ---
+      - ACTIVE_STORAGE_SERVICE=local
+
+      # --- Mailer (V2: preencher quando tiver SMTP) ---
+      - MAILER_SENDER_EMAIL=Hermes <hermes@technowhub.ai>
+      - SMTP_DOMAIN=technowhub.ai
+
+      # --- Misc ---
+      - ENABLE_RACK_ATTACK=true
+      - RACK_ATTACK_LIMIT=300
+    volumes:
+      - chatwoot-storage:/app/storage
+      - branding:/branding:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  sidekiq:
+    image: chatwoot/chatwoot:v3.16.0
+    restart: unless-stopped
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+    environment:
+      - INSTALLATION_NAME=Hermes
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+      - SECRET_KEY_BASE=${SERVICE_BASE64_64_SECRETKEYBASE}
+      - FRONTEND_URL=${SERVICE_FQDN_RAILS_3000}
+      - DEFAULT_LOCALE=pt_BR
+
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=${SERVICE_PASSWORD_POSTGRES}
+      - POSTGRES_DATABASE=chatwoot
+
+      - REDIS_URL=redis://:${SERVICE_PASSWORD_REDIS}@redis:6379
+
+      - ACTIVE_STORAGE_SERVICE=local
+
+      - MAILER_SENDER_EMAIL=Hermes <hermes@technowhub.ai>
+      - SMTP_DOMAIN=technowhub.ai
+    volumes:
+      - chatwoot-storage:/app/storage
+      - branding:/branding:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rails:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  redis-data:
+  chatwoot-storage:
+  branding:

@@ -1,0 +1,105 @@
+/* ============================================================
+   HERMES — Chatwoot Custom CSS · Tech Now brand layer
+   Aplicado em Settings → Custom CSS no Chatwoot.
+   Sobrescreve as variáveis do tema --w-* do Chatwoot pra Tiffany
+   (#0ABAB5) como primária e Rose (#EC6088) como accent.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* Chatwoot usa --w-* / --color-woot. Sobrescrevo a paleta woot pra Tiffany. */
+  --w-50:  #E6F8F7;
+  --w-100: #B8ECEB;
+  --w-200: #8AE0DE;
+  --w-300: #5CD4D2;
+  --w-400: #2EC8C5;
+  --w-500: #0ABAB5;   /* primary Tiffany */
+  --w-600: #099E99;
+  --w-700: #07827E;
+  --w-800: #057572;
+  --w-900: #04201F;
+
+  /* Alias usados em vários componentes */
+  --color-woot: #0ABAB5;
+  --color-primary: #0ABAB5;
+  --color-primary-hover: #099E99;
+
+  /* Accent rose pra badges/alerts/notifications */
+  --r-400: #F18AA8;
+  --r-500: #EC6088;
+  --r-600: #D44872;
+
+  /* Tipografia */
+  --font-inter: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Tipografia global */
+body,
+html {
+  font-family: var(--font-inter) !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Botões primários — Tiffany */
+.button,
+button.button--primary,
+.button--primary,
+button[class*="primary"] {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+.button:hover,
+button.button--primary:hover,
+.button--primary:hover {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+}
+
+/* Links */
+a,
+a:visited {
+  color: var(--color-primary);
+}
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Badges/alertas — Rose como destaque */
+.badge--alert,
+.badge--danger,
+.notification--unread,
+.unread-badge {
+  background-color: var(--r-500) !important;
+  color: #FFFFFF !important;
+}
+
+/* Sidebar ativa — fundo Tiffany suave */
+.sidebar .secondary-menu .menu-item.active,
+.app-context-menu li.active {
+  background-color: rgba(10, 186, 181, 0.10);
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Login/signup card — borda Tiffany sutil */
+.auth-container .column,
+.auth-container .container {
+  border-top: 4px solid var(--color-primary);
+}
+
+/* Headlines com peso heavy/black */
+h1, h2, h3, .heading {
+  font-family: var(--font-inter);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Scrollbar discreto na cor Tiffany */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(10, 186, 181, 0.35);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary);
+}

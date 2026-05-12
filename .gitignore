@@ -1,0 +1,28 @@
+# Secrets — NEVER commit
+.env
+.env.local
+.env.production
+*.pem
+*.key
+*-credentials.json
+hetzner-token.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local
+node_modules/
+.cache/
+tmp/
+*.log
+
+# Hermes-specific
+infra/firewall-rules.json.local
+.server-ip
