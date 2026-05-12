@@ -3,31 +3,25 @@
 
 services:
   redis:
-    # Reativa --requirepass usando o SERVICE_PASSWORD_REDIS gerado pelo Coolify
     command:
       - sh
       - "-c"
       - 'redis-server --requirepass "$$SERVICE_PASSWORD_REDIS"'
-    healthcheck:
-      test:
-        - CMD
-        - redis-cli
-        - "-a"
-        - $SERVICE_PASSWORD_REDIS
-        - PING
 
   chatwoot:
     networks:
       - default
       - coolify
     environment:
-      - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
-      - REDIS_URL=redis://:$SERVICE_PASSWORD_REDIS@redis-zhyazpyh7gurzxd46k4rwhz9:6379
+      POSTGRES_HOST: postgres-zhyazpyh7gurzxd46k4rwhz9
+      REDIS_HOST: redis-zhyazpyh7gurzxd46k4rwhz9
+      REDIS_URL: "redis://:${SERVICE_PASSWORD_REDIS}@redis-zhyazpyh7gurzxd46k4rwhz9:6379"
 
   sidekiq:
     environment:
-      - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
-      - REDIS_URL=redis://:$SERVICE_PASSWORD_REDIS@redis-zhyazpyh7gurzxd46k4rwhz9:6379
+      POSTGRES_HOST: postgres-zhyazpyh7gurzxd46k4rwhz9
+      REDIS_HOST: redis-zhyazpyh7gurzxd46k4rwhz9
+      REDIS_URL: "redis://:${SERVICE_PASSWORD_REDIS}@redis-zhyazpyh7gurzxd46k4rwhz9:6379"
 
 networks:
   coolify:
