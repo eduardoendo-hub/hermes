@@ -26,3 +26,4 @@ tmp/
 # Hermes-specific
 infra/firewall-rules.json.local
 .server-ip
+.claude/
