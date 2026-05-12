@@ -1,16 +1,5 @@
 # Override Hermes — fixes pra usar template Chatwoot do Coolify em paralelo
 # com o stack do próprio Coolify no mesmo host.
-#
-# Problemas que resolve:
-# 1. chatwoot precisa estar na rede `coolify` (onde Traefik vive) pra ser
-#    roteado. Mas a coolify network também tem o `coolify-db` (postgres do
-#    Coolify) com alias DNS "postgres" — colide com nosso `postgres-<uuid>`.
-# 2. Mesma coisa pra redis: `coolify-redis` na rede coolify com alias
-#    "redis" colide com nosso redis-<uuid>.
-#
-# Fix: usar container names completos (FQDN dentro do Docker DNS) pra
-# garantir que chatwoot+sidekiq batam no NOSSO postgres/redis, não no do
-# Coolify.
 
 services:
   chatwoot:
@@ -20,11 +9,13 @@ services:
     environment:
       - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
       - REDIS_URL=redis://redis-zhyazpyh7gurzxd46k4rwhz9:6379
+      - REDIS_PASSWORD=
 
   sidekiq:
     environment:
       - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
       - REDIS_URL=redis://redis-zhyazpyh7gurzxd46k4rwhz9:6379
+      - REDIS_PASSWORD=
 
 networks:
   coolify:
