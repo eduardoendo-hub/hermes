@@ -93,6 +93,9 @@ services:
     volumes:
       - chatwoot-storage:/app/storage
       - branding:/branding:ro
+    networks:
+      - default
+      - coolify
     depends_on:
       postgres:
         condition: service_healthy
@@ -145,3 +148,8 @@ volumes:
   redis-data:
   chatwoot-storage:
   branding:
+
+networks:
+  coolify:
+    external: true
+    name: coolify
