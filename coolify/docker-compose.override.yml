@@ -1,17 +1,30 @@
-# Override que conecta o sub-app `chatwoot` (do template Coolify) à rede
-# externa `coolify` onde o Traefik vive. Necessário porque o template
-# original só anexa o container à rede privada do resource.
+# Override Hermes — fixes pra usar template Chatwoot do Coolify em paralelo
+# com o stack do próprio Coolify no mesmo host.
 #
-# Aplicar manualmente colando este arquivo em:
-#   /data/coolify/services/<UUID>/docker-compose.override.yml
-# Docker Compose lê automaticamente arquivos chamados `docker-compose.override.yml`
-# no mesmo diretório.
+# Problemas que resolve:
+# 1. chatwoot precisa estar na rede `coolify` (onde Traefik vive) pra ser
+#    roteado. Mas a coolify network também tem o `coolify-db` (postgres do
+#    Coolify) com alias DNS "postgres" — colide com nosso `postgres-<uuid>`.
+# 2. Mesma coisa pra redis: `coolify-redis` na rede coolify com alias
+#    "redis" colide com nosso redis-<uuid>.
+#
+# Fix: usar container names completos (FQDN dentro do Docker DNS) pra
+# garantir que chatwoot+sidekiq batam no NOSSO postgres/redis, não no do
+# Coolify.
 
 services:
   chatwoot:
     networks:
       - default
       - coolify
+    environment:
+      - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
+      - REDIS_URL=redis://redis-zhyazpyh7gurzxd46k4rwhz9:6379
+
+  sidekiq:
+    environment:
+      - POSTGRES_HOST=postgres-zhyazpyh7gurzxd46k4rwhz9
+      - REDIS_URL=redis://redis-zhyazpyh7gurzxd46k4rwhz9:6379
 
 networks:
   coolify:
